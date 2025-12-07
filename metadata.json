@@ -1,0 +1,5 @@
+{
+  "name": "NetLearn: High-Performance Networking",
+  "description": "An interactive platform to learn advanced networking concepts like NCCL, RDMA, P4, eBPF, and Congestion Control with AI-powered assistance.",
+  "requestFramePermissions": []
+}
