@@ -7,6 +7,7 @@ export enum TopicId {
   P4 = 'p4',
   EBPF = 'ebpf',
   DOCA = 'doca',
+  TOOLS = 'tools',
 }
 
 export interface TopicSection {

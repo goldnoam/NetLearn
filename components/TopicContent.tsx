@@ -133,20 +133,30 @@ const TopicContent: React.FC<TopicContentProps> = ({ data }) => {
             <div className="prose prose-lg prose-slate dark:prose-invert max-w-none text-slate-600 dark:text-slate-300">
               <ReactMarkdown
                 components={{
-                    code: (props: any) => {
-                        const { node, inline, className, children, ...rest } = props;
-                        return (
-                          <code 
-                            className={`${className || ''} ${!inline ? 'block bg-slate-900 text-slate-50 p-4 rounded-lg my-4 overflow-x-auto border border-slate-800' : 'bg-slate-100 dark:bg-slate-800 text-pink-600 dark:text-pink-400 px-1.5 py-0.5 rounded text-sm font-mono font-medium'}`} 
-                            {...rest}
-                          >
+                    code: ({ node, className, children, ...props }: any) => {
+                        const match = /language-(\w+)/.exec(className || '');
+                        const isInline = !match;
+                        return isInline ? (
+                          <code className="bg-slate-100 dark:bg-slate-800 text-pink-600 dark:text-pink-400 px-1.5 py-0.5 rounded text-sm font-mono font-medium">
+                            {children}
+                          </code>
+                        ) : (
+                          <code className={`${className || ''} block bg-slate-900 text-slate-50 p-4 rounded-lg my-4 overflow-x-auto border border-slate-800 font-mono text-sm`}>
                             {children}
                           </code>
                         );
                     },
-                    a: (props: any) => {
-                        const { node, ...rest } = props;
-                        return <a className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline" target="_blank" rel="noopener noreferrer" {...rest} />;
+                    a: ({ href, children, ...props }: any) => {
+                        return (
+                          <a 
+                            href={href}
+                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            {children}
+                          </a>
+                        );
                     }
                 }}
               >

@@ -1,6 +1,6 @@
 
 import { TopicData, TopicId } from './types';
-import { Network, Cpu, Activity, Layers, Terminal, Box, Server } from 'lucide-react';
+import { Network, Cpu, Activity, Layers, Terminal, Box, Server, Search, Shield, Wrench } from 'lucide-react';
 import React from 'react';
 
 // We map icons in the component rendering phase, but here we store keys
@@ -21,13 +21,9 @@ This platform covers the internals of:
 * **Hardware Offload**: RDMA, RoCEv2
 * **Programmability**: P4, eBPF
 * **SDKs**: DOCA, Switch SDKs
+* **Analysis Tools**: Wireshark, Proxyman
 
 Select a module from the sidebar to begin.`
-      },
-      {
-        title: 'Further Reading',
-        content: `* [Introduction to High Performance Networking](https://example.com)
-* [Linux Kernel Networking Documentation](https://www.kernel.org/doc/html/latest/networking/index.html)`
       }
     ]
   },
@@ -58,11 +54,6 @@ This allows bandwidth optimal communication independent of the number of nodes (
           question: "What is the main advantage of using Ring AllReduce for large messages?",
           answer: "Ring AllReduce is bandwidth-optimal for large messages because the communication cost is constant per GPU regardless of the cluster size (assuming full bandwidth utilization), making it highly scalable compared to naive all-to-all approaches."
         }
-      },
-      {
-        title: 'Further Reading',
-        content: `* [NVIDIA NCCL Developer Guide](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/index.html)
-* [Massively Scale Deep Learning Training](https://developer.nvidia.com/blog/massively-scale-deep-learning-training-nccl-2-4/)`
       }
     ]
   },
@@ -88,11 +79,6 @@ This allows bandwidth optimal communication independent of the number of nodes (
 * **MR (Memory Region)**: Registered memory accessible by the NIC.
 
 Communication is asynchronous: You post a "Work Request" (WR) to a queue, and later poll the CQ for a "Work Completion" (WC).`
-      },
-      {
-        title: 'Further Reading',
-        content: `* [RDMA Awareness Programming User Manual](https://docs.nvidia.com/networking/display/RDMAAwareProgrammingv17)
-* [RoCE Initiative](https://www.roceinitiative.org/)`
       }
     ]
   },
@@ -110,11 +96,6 @@ Communication is asynchronous: You post a "Work Request" (WR) to a queue, and la
       {
         title: 'DCQCN',
         content: `Data Center Quantized Congestion Notification. It combines ECN (Explicit Congestion Notification) marks from switches with a rate-control state machine at the sender (similar to QCN).`
-      },
-      {
-        title: 'Further Reading',
-        content: `* [DCQCN: Congestion Control for Large-Scale RDMA Deployments (SIGCOMM)](https://conferences.sigcomm.org/sigcomm/2015/pdf/papers/p537.pdf)
-* [Understanding Data Center TCP (DCTCP)](https://ai.google/research/pubs/pub36640)`
       }
     ]
   },
@@ -140,11 +121,59 @@ Communication is asynchronous: You post a "Work Request" (WR) to a queue, and la
         content: `The core abstraction. "Match" on header fields (Exact, LPM, Ternary) and execute an "Action" (Drop, Forward, Modify Header).
 
 You can use the **Table Editor** tab in the visualization above to try creating your own match-action rules and testing them against packets.`
+      }
+    ]
+  },
+  {
+    id: TopicId.TOOLS,
+    title: 'Networking Tools',
+    description: 'Analysis, Debugging & Performance Tuning',
+    icon: 'Search',
+    visualizationType: 'none',
+    sections: [
+      {
+        title: 'Wireshark: Deep Packet Inspection',
+        content: `Wireshark is the industry standard for protocol analysis. It captures traffic from the wire and dissects headers down to the bit level.
+
+**Deep Dive for HPC:**
+* **RoCEv2 Analysis**: Wireshark can dissect InfiniBand-over-UDP (RoCEv2) traffic, allowing you to see RDMA OpCodes, Queue Pair numbers, and Sequence numbers.
+* **Display Filters**: Use \`roce\` or \`ib\` to isolate high-performance traffic.
+* **Expert Info**: Quickly identifies retransmissions, out-of-order packets, and window-full events.
+
+Official Website: [www.wireshark.org](https://www.wireshark.org/)`
       },
       {
-        title: 'Further Reading',
-        content: `* [P4 Language Specification](https://p4.org/specs/)
-* [Intel Tofino Programmable Switches](https://www.intel.com/content/www/us/en/products/network-io/programmable-ethernet-switch.html)`
+        title: 'Proxyman: Modern Web Debugging',
+        content: `Proxyman is a native high-performance HTTP/HTTPS proxy tool. While Wireshark handles the binary wire-level, Proxyman excels at the application layer.
+
+**Key Use Cases:**
+* **HTTPS Decryption**: Seamlessly inspect encrypted payloads from mobile apps or web services.
+* **Scripting**: Use JavaScript to modify requests/responses (e.g., simulate server errors or latency).
+* **Comparison**: Side-by-side view of request versions to find regressions.
+
+Official Website: [proxyman.io](https://proxyman.io/)`
+      },
+      {
+        title: 'tcpdump: The Swiss Army Knife',
+        content: `A command-line packet analyzer. It's lightweight and present on almost every Linux server.
+
+**Quick Commands:**
+* \`tcpdump -i eth0 -n\`: Capture all traffic on eth0 without DNS resolution.
+* \`tcpdump -i eth0 udp port 4791\`: Capture RoCEv2 traffic (default port).
+* \`tcpdump -w trace.pcap\`: Save capture to a file for later analysis in Wireshark.
+
+Official Website: [www.tcpdump.org](https://www.tcpdump.org/)`
+      },
+      {
+        title: 'iPerf3: Bandwidth Measurement',
+        content: `iPerf3 is the tool for measuring maximum achievable bandwidth on IP networks.
+
+**Why use it?**
+* Test TCP/UDP throughput between nodes.
+* Measure Jitter and Packet Loss.
+* Baseline network performance before deploying RDMA/NCCL workloads.
+
+Official Website: [iperf.fr](https://iperf.fr/)`
       }
     ]
   },
@@ -158,29 +187,6 @@ You can use the **Table Editor** tab in the visualization above to try creating 
       {
         title: 'Kernel Programmability',
         content: `eBPF allows running sandboxed programs in the Linux kernel without changing kernel source code.`
-      },
-      {
-        title: 'XDP (eXpress Data Path)',
-        content: `XDP hooks run at the earliest point in the network driver. 
-        
-**Actions**:
-* \`XDP_DROP\`: Drop immediately (DDoS mitigation).
-* \`XDP_TX\`: Bounce back out same interface.
-* \`XDP_PASS\`: Pass to standard kernel stack.`
-      },
-      {
-        title: 'Observability & Security',
-        content: `Because eBPF runs in the kernel, it has global visibility into all system calls and network packets.
-        
-**Observability**: Tools like **Hubble** (part of Cilium) use eBPF to create service dependency maps and monitor flows without application instrumentation.
-
-**Security**: eBPF can enforce security policies at the socket layer. It allows for "invisible" firewalls that are harder for attackers to bypass than userspace agents.`
-      },
-      {
-        title: 'Further Reading',
-        content: `* [ebpf.io - What is eBPF?](https://ebpf.io/what-is-ebpf/)
-* [XDP Tutorial](https://github.com/xdp-project/xdp-tutorial)
-* [Cilium & Hubble](https://cilium.io/)`
       }
     ]
   },
@@ -193,23 +199,7 @@ You can use the **Table Editor** tab in the visualization above to try creating 
     sections: [
       {
         title: 'What is DOCA?',
-        content: `DOCA (Data Center on a Chip Architecture) is the software framework that unlocks the potential of the NVIDIA BlueField DPU (Data Processing Unit). Similar to how CUDA enables programming for GPUs, DOCA enables developers to program the data center infrastructure.`
-      },
-      {
-        title: 'Key Features & Offloading',
-        content: `DOCA is used to offload, accelerate, and isolate data center infrastructure services from the host CPU.
-
-**Key capabilities include:**
-* **Networking**: Accelerate SDN, OVS, and routing logic.
-* **Security**: Offload Next-Generation Firewall (NGFW), DDOS protection, and encryption/decryption.
-* **Storage**: Virtualize storage with NVMe-oF and accelerate compression/decompression.
-* **Telemetry**: Gather deep network insights without impacting CPU performance.
-`
-      },
-      {
-        title: 'Further Reading',
-        content: `* [NVIDIA DOCA SDK Documentation](https://developer.nvidia.com/networking/doca)
-* [BlueField DPU Architecture](https://www.nvidia.com/en-us/networking/products/data-processing-unit/)`
+        content: `DOCA (Data Center on a Chip Architecture) is the software framework for the NVIDIA BlueField DPU. It allows offloading infrastructure tasks (security, storage, networking) from the host CPU to the DPU hardware.`
       }
     ]
   }
@@ -218,8 +208,9 @@ You can use the **Table Editor** tab in the visualization above to try creating 
 // Helper to get icon component
 export const getIcon = (iconName: string, props: any = {}) => {
   const icons: Record<string, React.FC<any>> = {
-    Network, Cpu, Activity, Layers, Terminal, Box, Server
+    Network, Cpu, Activity, Layers, Terminal, Box, Server, Search, Shield, Wrench
   };
-  const Icon = icons[iconName] || Network;
+  const Icon = icons[iconName];
+  if (!Icon) return <Network {...props} />;
   return <Icon {...props} />;
 };
